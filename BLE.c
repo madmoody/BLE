@@ -5,7 +5,7 @@
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
 #include <bluetooth/hci_lib.h>
-//#include <bluetooth/bluez/attrib/gatt.h>
+#include <bluetooth/bluez/attrib/gatt.h>
 
 char *MAC_ACCADD  = "12:34:56:78:90:00";
 char *characteristic_uuid = "0x0112233445566778899AABBCCDDEEFFO";
@@ -39,7 +39,29 @@ while(1){
 
 	if(strcmp(BLEADD,MAC_ACCADD) == 0){
 	printf("Device found %s\n:",BLEADD);
-  
+
+	 GattAttribute* attr = NULL;
+    while (1) {
+        attr = find_characteristic_by_uuid(characteristic_uuid);
+        if (attr != NULL) {
+            break;
+        }
+        sleep(1);
+    }
+        length = gatt_read(sock, attr, buffer, sizeof(buffer));
+
+        if(length < 0) {
+        perror("Failed to read characteristic value");
+        exit(1);
+        }
+
+
+        for (int i = 0; i < length; i++) {
+        printf("%02X ", buffer[i]);
+
+        printf("\n");
+        }
+
 
 }
 else{
