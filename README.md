@@ -43,15 +43,34 @@ SCAN FOR THE ACCELEROMETER
         exit(1);
         }
 
-CHECK THE MAC ADRESS OF THE ACCELEOMETER AND PRINT MAC ADDRES
+To build the connection with Accelometer assign some value 
 
-        if(strcmp(BLEADD,MAC_ACCADD) == 0){
-        printf("Device found %s\n:",BLEADD);
+        bdaddr_t peer_bdaddr;
+    str2ba(:Accelometer mac address", &peer_bdaddr);
 
-FIND THE CHARACTERISTIC UUID OF ACCELEROMETER
+    uint16_t handle = 0;
+    uint8_t initiator_filter = 0;
+    uint8_t peer_bdaddr_type = LE_PUBLIC_ADDRESS;
+    uint8_t own_bdaddr_type = LE_PUBLIC_ADDRESS;
+    uint16_t interval = htobs(0x0006);
+    uint16_t window = htobs(0x0006);   
+    uint16_t min_interval = 0x0006;    
+    uint16_t max_interval = 0x0C80;    
+    uint16_t latency = 0;
+    uint16_t supervision_timeout = 0x0640;
+    uint16_t min_ce_length = 0x0000;  
+    uint16_t max_ce_length = 0xFFFF;  
 
-        attr = find_characteristic_by_uuid(characteristic_uuid);
+FIND Scan the Mac OF BLE Device
 
-STORE THE VALUE IN BUFFER
+	ba2str(&ii[i].bdaddr,BLEADD);
 
-        length = gatt_read(sock, attr, buffer, sizeof(buffer));
+STORE THE NAME OF DEVICE IN BUFFER
+
+	int read = hci_read_remote_name(sock,&ii[i].bdaddr,sizeof(devicename),devicename,0);
+
+ To BUILD cONNECTION This API WILL HELP
+
+     int r = hci_le_create_conn(sock, interval, window, initiator_filter, peer_bdaddr_type,
+        peer_bdaddr, own_bdaddr_type, min_interval, max_interval, latency,
+        supervision_timeout, min_ce_length, max_ce_length, &handle, CONNECT_TIMEOUT * 1000000);
