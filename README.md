@@ -13,8 +13,6 @@ THESE ARE THE BLE LIBRARY MENTION ALONG WITH PATH
     #include <bluetooth/bluetooth.h>
     #include <bluetooth/hci.h>
     #include <bluetooth/hci_lib.h>
-    #include <bluetooth/bluez/attrib/gatt.h>
-
 
 MAC ADRESS OF ACCELOMETER AND CHARACTERISTIC ID 
 
@@ -32,7 +30,7 @@ INITIALISE THE BLE IN LINUX
 
 SCAN FOR THE ACCELEROMETER
 
-     inquiry_info* ii = NULL;
+        inquiry_info* ii = NULL;
         int max_rsp = 255;
         int num_rsp = 0;
         long flags = IREQ_CACHE_FLUSH;
@@ -44,36 +42,42 @@ SCAN FOR THE ACCELEROMETER
         }
 
 To build the connection with Accelometer assign some value 
-
-        bdaddr_t peer_bdaddr;
-    str2ba(:Accelometer mac address", &peer_bdaddr);
+ 
+    bdaddr_t peer_bdaddr;
+    str2ba("12:34:56:78:90:00", &peer_bdaddr);
 
     uint16_t handle = 0;
     uint8_t initiator_filter = 0;
     uint8_t peer_bdaddr_type = LE_PUBLIC_ADDRESS;
     uint8_t own_bdaddr_type = LE_PUBLIC_ADDRESS;
-    uint16_t interval = htobs(0x0006);
-    uint16_t window = htobs(0x0006);   
-    uint16_t min_interval = 0x0006;    
-    uint16_t max_interval = 0x0C80;    
-    uint16_t latency = 0;
-    uint16_t supervision_timeout = 0x0640;
-    uint16_t min_ce_length = 0x0000;  
-    uint16_t max_ce_length = 0xFFFF;  
+    uint16_t ptype = 0x0800;   
+    uint16_t clkoffset = 0x0000; 
+    uint8_t rswitch = 0x01;  
+
+CHECK THE CONNECTION
+
+    num_rsp = hci_inquiry(BLE_id, 8, max_rsp, NULL, &ii, flags);
+    if (num_rsp < 0) {
+        perror("HCI inquiry failed");
+        close(sock);
+        exit(1);
+    }
 
 FIND Scan the Mac OF BLE Device
 
 	ba2str(&ii[i].bdaddr,BLEADD);
-
+ 	 	 
 STORE THE NAME OF DEVICE IN BUFFER
 
 	int read = hci_read_remote_name(sock,&ii[i].bdaddr,sizeof(devicename),devicename,0);
 
+ STORE LOCAL NAME OF DEVICE 
+
+  	int Local_Name = hci_read_local_name(sock,8,BLELOCAL,0);
+	
  To BUILD cONNECTION This API WILL HELP
 
-     int r = hci_le_create_conn(sock, interval, window, initiator_filter, peer_bdaddr_type,
-        peer_bdaddr, own_bdaddr_type, min_interval, max_interval, latency,
-        supervision_timeout, min_ce_length, max_ce_length, &handle, CONNECT_TIMEOUT * 1000000);
+     	int result = hci_create_connection(sock, &ii[i].bdaddr, ptype, clkoffset, rswitch, &handle, 10000);
 
 
 # BLE SERVER
