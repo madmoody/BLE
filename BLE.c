@@ -38,14 +38,9 @@ int main() {
     uint8_t initiator_filter = 0;
     uint8_t peer_bdaddr_type = LE_PUBLIC_ADDRESS;
     uint8_t own_bdaddr_type = LE_PUBLIC_ADDRESS;
-    uint16_t interval = htobs(0x0006);
-    uint16_t window = htobs(0x0006);   
-    uint16_t min_interval = 0x0006;    
-    uint16_t max_interval = 0x0C80;    
-    uint16_t latency = 0;
-    uint16_t supervision_timeout = 0x0640;
-    uint16_t min_ce_length = 0x0000;  
-    uint16_t max_ce_length = 0xFFFF;  
+    uint16_t ptype = 0x0800;   
+    uint16_t clkoffset = 0x0000; 
+    uint8_t rswitch = 0x01;  
 
     num_rsp = hci_inquiry(BLE_id, 8, max_rsp, NULL, &ii, flags);
     if (num_rsp < 0) {
@@ -56,6 +51,7 @@ int main() {
     
  char BLEADD[255];
  char BLELOCAL[255];
+ char BLEFEATURE[255];
 	for(int i = 0;i<num_rsp;i++){
 	ba2str(&ii[i].bdaddr,BLEADD);
 	
@@ -67,7 +63,9 @@ int main() {
         memset(BLELOCAL, 0, sizeof(BLELOCAL));
 
         int Local_Name = hci_read_local_name(sock,8,BLELOCAL,0);
-	
+	int Feature = hci_le_read_remote_features(sock,handle,BLEFEATURE,0);
+
+
 	if(read < 0){
 	perror("Not able read:"); 
 	exit(1);
@@ -76,22 +74,22 @@ int main() {
 	perror("Not able to read Local");
 	exit(1);	
 	}
+
+	printf("Device name: %s\n local Name: %s\n Feature Name : %s\n", devicename,BLELOCAL,BLEFEATURE);
 	
-	printf("Device name: %s\n local Name: %s\n", devicename,BLELOCAL);
-	}
+}
 
-	int r = hci_le_create_conn(sock, interval, window, initiator_filter, peer_bdaddr_type,
-        peer_bdaddr, own_bdaddr_type, min_interval, max_interval, latency,
-        supervision_timeout, min_ce_length, max_ce_length, &handle, CONNECT_TIMEOUT * 1000000);
+int i = 0;
+while(i < num_rsp){
 
-        if (r < 0) {
-        perror("Failed to create connection");
-	exit(1);
+	int result = hci_create_connection(sock, &ii[i].bdaddr, ptype, clkoffset, rswitch, &handle, 10000);
 
-        } 
-	
-        printf("Handle: %d (0x%04x)\n", handle, handle);
-       
+        if(result < 0){
+        perror("Connection Failed : ");
+        exit(1);
+        }
+	i++;
+}
 
     free(ii);
     close(sock);
