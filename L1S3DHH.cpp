@@ -32,7 +32,6 @@ class MyServerCallbacks: public BLEServerCallbacks{
 void setup() {
 Serial.begin(115200);
 
-Serial.begin(115200);
   if (!lis.begin(0x18)) { // Change to 0x19 if your sensor has the address 0x19
     Serial.println("Couldnt start");
     while (1);
