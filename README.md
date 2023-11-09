@@ -1,4 +1,4 @@
-# BLE
+# BLE CLient
 
 Need to install bluez development package for linux/macos so where we can connect with macadress
 
@@ -74,3 +74,59 @@ STORE THE NAME OF DEVICE IN BUFFER
      int r = hci_le_create_conn(sock, interval, window, initiator_filter, peer_bdaddr_type,
         peer_bdaddr, own_bdaddr_type, min_interval, max_interval, latency,
         supervision_timeout, min_ce_length, max_ce_length, &handle, CONNECT_TIMEOUT * 1000000);
+
+
+# BLE SERVER
+
+Take ESP32 Microcontroller Along with connect LIS3DH Accelerometer 
+
+Install Arduino IDE Install Libraries in Library manager
+
+	#include <BLEUtils.h>
+	#include <BLEServer.h>
+	#include <BLE2902.h>
+	#include <Wire.h>
+	#include <Adafruit_LIS3DH.h>
+
+Generate UUID for Server and Characteristics
+	#define BLESERUUID "d618ad51-7aa1-49a7-891d-d05992a95d0c"
+	#define BLECHARUUID "0112-2334-4556-6778-899AABBCCDDEEFF0"
+
+Give Server name and characteristic name 
+
+	static BLEServer *pServer;
+	static BLERemoteCharacteristic *pCharacterAddress;
+	static BLECharacteristic *bCharacteristic = NULL;
+	Adafruit_LIS3DH lis = Adafruit_LIS3DH()
+
+Start accelerometer with 0x18 address of device
+
+ 	if (!lis.begin(0x18)) {
+        Serial.println("Couldnt start");
+        while (1);}
+
+Create Server and characteristic uuid
+
+	BLEDevice::init(BleServerName);
+	pServer = BLEDevice::createServer();
+	pServer->setCallbacks(new MyServerCallbacks());
+	BLEService *bService = pServer->createService(BLESERUUID);
+	bCharacteristic = bService->createCharacteristic(BLECHARUUID,                     
+                      BLECharacteristic::PROPERTY_NOTIFY |
+                      BLECharacteristic::PROPERTY_INDICATE
+                 );
+
+Start Advertising The device
+
+ 	bService->start();
+	BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
+	pAdvertising->addServiceUUID(BLESERUUID);
+	pAdvertising->setScanResponse(false);
+	pAdvertising->setMinPreferred(0x0);
+	//pAdvertising->setMinPreferred(0x12);
+	BLEDevice::startAdvertising();
+
+Value will Notify if anychange
+
+	bCharacteristic->setValue(Value);
+   	bCharacteristic->notify(); 
