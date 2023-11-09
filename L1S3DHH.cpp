@@ -10,7 +10,6 @@
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
 
-
 #define BleServerName "PAVAN"
 
 static BLEServer *pServer;
